@@ -1,0 +1,88 @@
+data <- read.csv(choose.files())
+str(data)
+table(data$class)
+# Binary class problem and balance dataset given
+data$class <- ifelse(data$class=='e',1,0)
+table(data$class)
+dim(data)
+colSums(is.na(data))
+# encoding part required 
+library(caret)
+str(data$stalk.root)
+table(data$stalk.root)
+table(data$cap.shape)
+# no missing data 
+table(data$cap.surface)
+table(data$cap.shape)
+table(data$cap.color)
+table(data$odor)
+table(data$gill.attachment)
+table(data$gill.spacing)
+table(data$gill.size)
+table(data$gill.color)
+table(data$stalk.shape)
+table(data$stalk.root)
+data$stalk.root<-ifelse(data$stalk.root=='?','b',data$stalk.root)
+table(data$stalk.root)
+table(data$stalk.color.below.ring)
+table(data$stalk.color.above.ring)
+table(data$veil.type)
+data$veil.type<-ifelse(data$veil.type=='p',0,0)
+table(data$veil.type)
+table(data$veil.color)
+table(data$ring.number)
+table(data$ring.type)
+table(data$spore.print.color)
+table(data$habitat)
+head(data)
+names <- mydata
+dim(mydata)
+library(caret)
+str(data)
+table(data$stalk.root)
+table(data$cap.shape)
+# Removing the variables which are the dummy variables 
+dum<- dummyVars("~ .",data = data)
+data<-data.frame(predict(dum,newdata=data))
+data<-data[,-c(2,22,24,33,51,57,61,65,74,83,88,96,105,111)]
+dim(data)
+# Outlier / Feature Scaling and imbalance treatment are not requierd 
+# Splitdata into training and testing for model fit 
+library(caTools) 
+split <- sample.split(data$class,SplitRatio = 0.75)
+split
+table(split)
+training<-subset(data,split==TRUE)
+test <- subset(data,split==FALSE)
+print(table(split))
+print(nrow(training))
+print(nrow(test))
+# Buildng a DEcisionTree model for training dataset 
+data<-data[,-c(-7)]
+install.packages("rpart")
+library(rpart)
+dtree<-rpart(class~.,data=training)
+summary(dtree)
+plot(dtree)
+test(dtree)
+install.packages("rattle")
+library(rattle)
+fancyRpartPlot(dtree)  
+# Predict the model using test data set 
+ypred<-predict(dtree,newdata=test)
+ypred
+ypred_value<-ifelse(ypred>=0.5,1,0)
+ypred_value
+cm <- table(test$class,ypred_value)
+cm
+library(caret)
+ConfusionMatrix(cm)
+dtree_pred_train<-predict(dtree,newdata = training)
+dtree_pred_train<-ifelse(dtree_pred_train>0.5,1,0)
+cm1<-table(training$class,dtree_pred_train)
+confusionMatrix(cm1)
+
+dtree_pred_test<-predict(dtree,newdata = test)
+dtree_pred_test<-ifelse(dtree_pred_test>0.5,1,0)
+cm2<-table(test$class,dtree_pred_test)
+confusionMatrix(cm2)
